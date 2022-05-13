@@ -321,9 +321,12 @@ get.sim.tl <- function(Yt, theta, S, s2 = 0, tau = 1, rct.lst){
     as.vector(unlist(str_split(r, "->")))
   }, simplify = "array")))), c("0","1"))
 
-  if(sum(!(ct.lst %in% colnames(Y))) > 0){
+  rgts.lst <- as.vector(unlist(lapply(strsplit(rct.lst, split = "->", fixed = T), function(s){s[1]})))
+  rgts_prod.lst <- unique(c(ct.lst, rgts.lst))
+
+  if(sum(!(rgts_prod.lst %in% colnames(Y))) > 0){
     cat(paste("Cell types not present in 'Y': ",
-              paste(as.vector(unlist(lapply(ct.lst[which(!(ct.lst %in% colnames(Y)))],
+              paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
               "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
               sep = ""))
@@ -1392,9 +1395,12 @@ fit.null <- function(Y,
     as.vector(unlist(str_split(r, "->")))
   }, simplify = "array")))), c("0","1"))
 
-  if(sum(!(ct.lst %in% colnames(Y))) > 0){
+  rgts.lst <- as.vector(unlist(lapply(strsplit(rct.lst, split = "->", fixed = T), function(s){s[1]})))
+  rgts_prod.lst <- unique(c(ct.lst, rgts.lst))
+
+  if(sum(!(rgts_prod.lst %in% colnames(Y))) > 0){
     cat(paste("Cell types not present in 'Y': ",
-              paste(as.vector(unlist(lapply(ct.lst[which(!(ct.lst %in% colnames(Y)))],
+              paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
               "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
               sep = ""))
@@ -1593,9 +1599,12 @@ fit.re <- function(theta_0,
     as.vector(unlist(str_split(r, "->")))
   }, simplify = "array")))), c("0","1"))
 
-  if(sum(!(ct.lst %in% colnames(Y))) > 0){
+  rgts.lst <- as.vector(unlist(lapply(strsplit(rct.lst, split = "->", fixed = T), function(s){s[1]})))
+  rgts_prod.lst <- unique(c(ct.lst, rgts.lst))
+
+  if(sum(!(rgts_prod.lst %in% colnames(Y))) > 0){
     cat(paste("Cell types not present in 'Y': ",
-              paste(as.vector(unlist(lapply(ct.lst[which(!(ct.lst %in% colnames(Y)))],
+              paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
               "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
               sep = ""))
