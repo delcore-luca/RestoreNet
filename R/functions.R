@@ -307,7 +307,7 @@ get.sim.tl <- function(Yt, theta, S, s2 = 0, tau = 1, rct.lst){
     cat(paste("Unvalid reactions provided in 'rct.lst': ",
               paste(rct.lst[which(!grepl(pattern,
                                          c(rct.lst),
-                                         ignore.case = FALSE))], collapse = ", "), sep = ""))
+                                         ignore.case = FALSE))], collapse = ", "), "\n", sep = ""))
     return()
   }
 
@@ -328,7 +328,7 @@ get.sim.tl <- function(Yt, theta, S, s2 = 0, tau = 1, rct.lst){
     cat(paste("Cell types not present in 'Y': ",
               paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
-              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
+              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.\n",
               sep = ""))
     return()
   }
@@ -1372,6 +1372,56 @@ fit.null <- function(Y,
                          lmm = 100,
                          trace = TRUE){
 
+  if(!is.array(Y)){
+    cat("Y must be a 3-dimensional array or a matrix.\n")
+    return()
+  }else{
+    if(length(dim(Y)) < 2 | length(dim(Y)) > 3){
+      cat("Y must be a 3-dimensional array or a matrix.\n")
+      return()
+    }else{
+      if(length(dim(Y)) == 2){
+        if(is.null(rownames(Y))){
+          cat("Please specify row names in Y as the time-points.\n")
+          return()
+        }else{
+          if(sum(is.na(as.numeric(rownames(Y)))) > 0){
+            cat("Please specify row names in Y as the time-points.\n")
+            return()
+          }
+        }
+        if(is.null(colnames(Y))){
+          cat("Please specify column names in Y as the cell types.\n")
+          return()
+        }
+        Y_arr <- array(Y, dim = c(dim(Y),1))
+        dimnames(Y_arr) <- list(rownames(Y),
+                                colnames(Y),
+                                "clone_1")
+        Y <- Y_arr
+        rm(Y_arr)
+      }else{
+        if(is.null(rownames(Y))){
+          cat("Please specify row names in Y as the time-points.\n")
+          return()
+        }else{
+          if(sum(is.na(as.numeric(rownames(Y)))) > 0){
+            cat("Please specify row names in Y as the time-points.\n")
+            return()
+          }
+        }
+        if(is.null(colnames(Y))){
+          cat("Please specify column names in Y as the cell types.\n")
+          return()
+        }
+        if(is.null(dimnames(Y)[[3]])){
+          cat("Please specify third-dimension names of Y as the unique barcode/clone identifiers.\n")
+          return()
+        }
+      }
+    }
+  }
+
   # pattern <- "[A-Z]+[0-9]*->([A-Z]+[0-9]*|[0-1]+)"
   pattern <- "[A-Z0-9]{1,}->[A-Z0-9]{0,}[0-1]{0,}"
 
@@ -1381,7 +1431,7 @@ fit.null <- function(Y,
     cat(paste("Unvalid reactions provided in 'rct.lst': ",
               paste(rct.lst[which(!grepl(pattern,
                                          c(rct.lst),
-                                         ignore.case = FALSE))], collapse = ", "), sep = ""))
+                                         ignore.case = FALSE))], collapse = ", "), "\n", sep = ""))
     return()
   }
 
@@ -1402,7 +1452,7 @@ fit.null <- function(Y,
     cat(paste("Cell types not present in 'Y': ",
               paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
-              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
+              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.\n",
               sep = ""))
     return()
   }
@@ -1410,7 +1460,7 @@ fit.null <- function(Y,
   compile.h(rct.lst = rct.lst, envir = environment())
   V <- get.V(ct.lst = ct.lst, rct.lst = rct.lst)
 
-  Y <- Y[,rownames(V),]
+  Y <- Y[,rownames(V),,drop = FALSE]
   Y_rbind <- Reduce(rbind, lapply(1:dim(Y)[3], function(cl){return(head(Y[,,cl],-1))}))
   dT <- rep(rep(diff(as.numeric(rownames(Y))), each = ncol(Y)), times = dim(Y)[3])
 
@@ -1572,6 +1622,34 @@ fit.re <- function(theta_0,
                        eps = 1e-5,
                        trace = TRUE){
 
+  if(!is.array(Y)){
+    cat("Y must be a 3-dimensional array (at least two clones).\n")
+    return()
+  }else{
+    if(length(dim(Y)) != 3){
+      cat("Y must be a 3-dimensional array (at least two clones).\n")
+      return()
+    }else{
+      if(is.null(rownames(Y))){
+        cat("Please specify row names in Y as the time-points.\n")
+        return()
+      }else{
+        if(sum(is.na(as.numeric(rownames(Y)))) > 0){
+          cat("Please specify row names in Y as the time-points.\n")
+          return()
+        }
+      }
+      if(is.null(colnames(Y))){
+        cat("Please specify column names in Y as the cell types.\n")
+        return()
+      }
+      if(is.null(dimnames(Y)[[3]])){
+        cat("Please specify third-dimension names of Y as the unique barcode/clone identifiers.\n")
+        return()
+      }
+    }
+  }
+
   # ct.lst <- unique(setdiff(c(sapply(rct.lst, function(r){
   #   as.vector(unlist(strsplit(r, split = "->", fixed = T)))
   # }, simplify = "array")), c("0", "1")))
@@ -1585,7 +1663,7 @@ fit.re <- function(theta_0,
     cat(paste("Unvalid reactions provided in 'rct.lst': ",
               paste(rct.lst[which(!grepl(pattern,
                                          c(rct.lst),
-                                         ignore.case = FALSE))], collapse = ", "), sep = ""))
+                                         ignore.case = FALSE))], collapse = ", "), "\n", sep = ""))
     return()
   }
 
@@ -1606,7 +1684,7 @@ fit.re <- function(theta_0,
     cat(paste("Cell types not present in 'Y': ",
               paste(as.vector(unlist(lapply(rgts_prod.lst[which(!(rgts_prod.lst %in% colnames(Y)))],
                                             function(l){paste("'", l, "'", sep = "")}))), collapse = ", "),
-              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.",
+              "\nPlease provide compatible cell types in 'Y' and 'rct.lst'.\n",
               sep = ""))
     return()
   }
@@ -1614,7 +1692,7 @@ fit.re <- function(theta_0,
   compile.h(rct.lst = rct.lst, envir = environment())
   V <- get.V(ct.lst = ct.lst, rct.lst = rct.lst)
 
-  Y <- Y[,rownames(V),]
+  Y <- Y[,rownames(V),,drop = FALSE]
   Y_rbind <- Reduce(rbind, lapply(1:dim(Y)[3], function(cl){return(head(Y[,,cl],-1))}))
   dT <- rep(rep(diff(as.numeric(rownames(Y))), each = ncol(Y)), times = dim(Y)[3])
 
